@@ -44,30 +44,38 @@ export default class ProductController {
       const createdRecord = await this.productRepository.add(newProduct);
       res.status(201).send(createdRecord);
     } catch (err) {
-      console.log("Passing error to middleware");
+      console.log("Passing error to middleware", err);
       res.status(500).send(err);
     }
   }
 
   rateProduct(req, res, next) {
-    console.log(req.query);
     try {
-      const userID = req.query.userID;
+      const userID = req.userID;
       const productID = req.query.productID;
-      const rating = req.querys.rating;
-      ProductModel.rateProduct(userID, productID, rating);
+      const rating = req.query.rating;
+      this.productRepository.rate(userID, productID, rating);
       return res.status(200).send("Rating has been added");
     } catch (err) {
-      console.log("Passing error to middleware");
+      console.log("Passing error to middleware", err);
       res.status(500).send(err);
     }
   }
 
-  filterProducts(req, res) {
-    const minPrice = req.query.minPrice;
-    const maxPrice = req.query.maxPrice;
-    const category = req.query.category;
-    const result = ProductModel.filter(minPrice, maxPrice, category);
-    res.status(200).send(result);
+  async filterProducts(req, res) {
+    try {
+      const minPrice = req.query.minPrice;
+      const maxPrice = req.query.maxPrice;
+      const category = req.query.category;
+      const result = await this.productRepository.filter(
+        minPrice,
+        maxPrice,
+        category
+      );
+      res.status(200).send(result);
+    } catch (err) {
+      console.log("Passing error to middleware");
+      res.status(500).send(err);
+    }
   }
 }

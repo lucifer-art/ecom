@@ -36,6 +36,45 @@ class ProductRepository {
             throw new ApplicationError("Something went wrong", 500);
         }
     }
+
+    async filter(minPrice, maxPrice, category) {
+        try{
+            const db = getDB();
+            const collection = db.collection(this.collection);
+            const filterExp = {};
+            if(minPrice){
+                filterExp.price = {$gte: parseFloat(minPrice)};
+            }
+            if(maxPrice){
+                
+                filterExp.price = {...filterExp.price, $lte: parseFloat(maxPrice)};
+            }
+            if(category) {
+                filterExp.category = category;
+            }
+            return await collection.find(filterExp).toArray();
+        } catch(err) {
+            throw new ApplicationError("Something went wrong", 500);
+        }
+    }
+    rate(userID, productID, rating) {
+        try {
+            const db = getDB();
+            const collection = db.collection(this.collection);
+            collection.updateOne({
+                _id: new ObjectId(productID)
+            },{
+                $push: {
+                    ratings: {
+                        userID: new ObjectId(userID),
+                        rating
+                    }
+                }
+            })
+        } catch(err) {
+            throw new ApplicationError("Something went wrong", 500);
+        }
+    }
 }
 
 export default ProductRepository;
