@@ -57,11 +57,20 @@ class ProductRepository {
             throw new ApplicationError("Something went wrong", 500);
         }
     }
-    rate(userID, productID, rating) {
+    async rate(userID, productID, rating) {
         try {
             const db = getDB();
             const collection = db.collection(this.collection);
-            collection.updateOne({
+            await collection.updateOne({
+                _id: new ObjectId(productID)
+            }, {
+                $pull: {
+                    ratings: {
+                        userID: new ObjectId(userID)
+                    }
+                }
+            })
+            await collection.updateOne({
                 _id: new ObjectId(productID)
             },{
                 $push: {
